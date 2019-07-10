@@ -4,15 +4,27 @@ require 'awspec'
 require 'aws-sdk'
 require 'rhcl'
 
-example_main = Rhcl.parse(File.open('examples/test_fixture/main.tf'))
-vpc_name = example_main['module']['vpc']['name']
-user_tag = example_main['module']['vpc']['tags']['owner']
-state_file = 'terraform.tfstate.d/kitchen-terraform-default-aws/terraform.state'
-tf_state = JSON.parse(File.open(state.file).read)
-region = tf_state['modules'][0]['outputs']['region']['value']
-ENV['AWS_REGION'] = region
+terraform_state_name = "-kitchen-terraform-default-aws"
+example_main = Rhcl.parse(File.open('test/test_fixture/main.tf'))
+environment_tag = terraform_state_name[1..-1]
+vpc_name = example_main['module']['vpc']['project_name'] + terraform_state_name
+gateway_name = example_main['module']['vpc']['project_name'] + terraform_state_name + "-public"
+cidr = example_main['module']['vpc']['cidr_block']
+owner_name = example_main['module']['vpc']['tags']['Owner']
 
-ec2 = Aws:EC2:Client.new(region: region)
-azs = ec2.describe_availability_zones
-zone_names = azs.to_h[:availability_zones].first(2).map { |az| az[:zone_name]}
+describe vpc(vpc_name.to_s) do
+    it { should exist }
+    it { should be_available }
+    it { should have_tag('Name').value(vpc_name.to_s)}
+    it { should have_tag('Environment').value(environment_tag.to_s)}
+    it { should have_tag('Owner').value(owner_name.to_s)}
+    it { should have_vpc_attribute('enableDnsHostnames')}
+    it { should have_vpc_attribute('enableDnsSupport')}
+end
 
+describe internet_gateway(gateway_name) do
+    it { should exist }
+    it { should be_attached_to(vpc_name)}
+    it { should have_tag('Name').value(gateway_name)}
+    it { should have_tag('Environment').value(environment_tag)}
+end
