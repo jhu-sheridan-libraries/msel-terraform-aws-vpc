@@ -7,9 +7,9 @@ output "vpc_arn" {
 }
 
 output "igw_id" {
-    value = concat(aws_internet_gateway.this[0].id, [""])[0]
+    value = concat(aws_internet_gateway.this.*.id, [""])[0]
 }
 
 output "public_route_table_id" {
-    value = concat(aws_route_table.public[0].id, [""])[0]
+    value = concat(aws_route_table.public.*.id, [""])[0]
 }

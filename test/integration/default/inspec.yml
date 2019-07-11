@@ -1,0 +1,5 @@
+name: default
+title: Default Test
+attributes:
+  - name: vpc_name
+    required: true
