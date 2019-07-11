@@ -6,6 +6,7 @@ data "aws_availability_zones" "available" {
 }
 
 module "vpc" {
+    create_vpc = true
     cidr = "10.0.0.0/16"
     source = "../../"
     project_name = "test-example"

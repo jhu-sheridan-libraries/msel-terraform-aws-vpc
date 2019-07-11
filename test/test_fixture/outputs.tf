@@ -4,5 +4,5 @@ output "region" {
 }
 
 output "vpc_name" {
-    value = aws_vpc.name
+    value = module.vpc.vpc_name
 }
